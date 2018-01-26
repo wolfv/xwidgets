@@ -36,7 +36,7 @@ string(TOUPPER "${CMAKE_BUILD_TYPE}" U_CMAKE_BUILD_TYPE)
 OPTION(DISABLE_ARCH_NATIVE "disable -march=native flag" OFF)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wunused-parameter -Wextra -Wreorder -O3")
     if (DISABLE_ARCH_NATIVE)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mtune=generic")
     else()
@@ -46,7 +46,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU"
     CHECK_CXX_COMPILER_FLAG("-std=c++11" HAS_CPP11_FLAG)
 
     if (HAS_CPP11_FLAG)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -flto ")
     else()
         message(FATAL_ERROR "Unsupported compiler -- xeux requires c++14 support!")
     endif()
@@ -144,19 +144,20 @@ set(XWIDGETS_HEADERS
     ${XWIDGETS_INCLUDE_DIR}/xwidgets/xvalid.hpp
     ${XWIDGETS_INCLUDE_DIR}/xwidgets/xwidget.hpp
     ${XWIDGETS_INCLUDE_DIR}/xwidgets/xwidgets_config.hpp
+    ${XWIDGETS_INCLUDE_DIR}/xwidgets/xprecompiled.hpp
 )
 
 # # Output
 # # ======
 # 
-# set(XWIDGETS_TARGET xwidgets)
-# add_library(${XWIDGETS_TARGET} SHARED ${XWIDGETS_SOURCES} ${XWIDGETS_HEADERS})
-# target_link_libraries(${XWIDGETS_TARGET} ${XWIDGETS_DEPENDENCIES})
-# set_target_properties(${XWIDGETS_TARGET} PROPERTIES
-#                       PUBLIC_HEADER "${XWIDGETS_HEADERS}"
-#                       COMPILE_DEFINITIONS "XWIDGETS_EXPORTS"
-#                       PREFIX ""
-#                       OUTPUT_NAME "libxwidgets")
+set(XWIDGETS_TARGET xwidgets)
+add_library(${XWIDGETS_TARGET} SHARED include/xwidgets/xwidgets.cpp ${XWIDGETS_HEADERS})
+target_link_libraries(${XWIDGETS_TARGET} ${XWIDGETS_DEPENDENCIES})
+set_target_properties(${XWIDGETS_TARGET} PROPERTIES
+                      PUBLIC_HEADER "${XWIDGETS_HEADERS}"
+                      COMPILE_DEFINITIONS "XWIDGETS_EXPORTS"
+                      PREFIX ""
+                      OUTPUT_NAME "libxwidgets")
 # 
 # get_property(XWIDGETS_NAME TARGET ${XWIDGETS_TARGET} PROPERTY OUTPUT_NAME)
 # if(MSVC)
